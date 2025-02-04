@@ -59,24 +59,6 @@ const questions = {
   }
 };
 
-const healthSectorQuestions = {
-  8: {
-    text: "Entitatea desfășoară activități de cercetare și dezvoltare a medicamentelor?",
-    options: ["Da", "Nu"],
-    key: "medicineResearch"
-  },
-  9: {
-    text: "Entitatea fabrică produse farmaceutice de bază?",
-    options: ["Da", "Nu"],
-    key: "pharmaProduction"
-  },
-  10: {
-    text: "Entitatea fabrică dispozitive medicale esențiale?",
-    options: ["Da", "Nu"],
-    key: "medicalDevices"
-  }
-};
-
 let currentStep = 1;
 let answers = {};
 let totalSteps = Object.keys(questions).length;
@@ -87,18 +69,10 @@ function updateProgress() {
 }
 
 function renderQuestion(step) {
-  let question;
-  if (answers.sector === 'Sănătate' && step > Object.keys(questions).length) {
-    question = healthSectorQuestions[step];
-    totalSteps = Object.keys(questions).length + Object.keys(healthSectorQuestions).length;
-  } else {
-    question = questions[step];
-  }
-  
+  const question = questions[step];
   if (!question) return showResult();
-
-  const container = document.getElementById('questionContainer');
   
+  const container = document.getElementById('questionContainer');
   container.innerHTML = `
     <h3>${question.text}</h3>
     <div class="radio-group">
@@ -126,8 +100,7 @@ function determineCategory() {
         "Implementare măsuri de securitate (Art. 11-14)",
         "Raportare incidente (Art. 15)",
         "Audit de securitate periodic (Art. 11 alin. 5)",
-        "Autoevaluare anuală (Art. 12 alin. 4)",
-        "Plan de măsuri remediere (Art. 12 alin. 5)"
+        "Autoevaluare anuală (Art. 12 alin. 4)"
       ],
       documents: [
         "Notificare către DNSC pentru înregistrare",
@@ -146,7 +119,7 @@ function determineCategory() {
       answers.publicSafetyImpact === 'Da' || 
       answers.systemicRisk === 'Da' ||
       answers.criticalImportance === 'Da') {
-    let explanation = "Entitate considerată esențială conform Art. 9 datorită: ";
+    let explanation = "Entitate considerată esențială conform Art. 9 datorită:";
     if (answers.uniqueProvider === 'Da') explanation += "\n- Este singurul furnizor al serviciului în zonă";
     if (answers.publicSafetyImpact === 'Da') explanation += "\n- Impact semnificativ asupra siguranței publice";
     if (answers.systemicRisk === 'Da') explanation += "\n- Poate genera risc sistemic";
@@ -160,52 +133,18 @@ function determineCategory() {
         "Notificare în 30 zile (Art. 18)",
         "Audit de securitate (Art. 11)",
         "Raportare incidente în 24h (Art. 15)",
-        "Implementare măsuri de securitate (Art. 11-14)",
-        "Autoevaluare anuală (Art. 12)"
+        "Implementare măsuri de securitate (Art. 11-14)"
       ],
       documents: [
         "Notificare către DNSC",
         "Politica de securitate cibernetică",
         "Plan de răspuns la incidente",
-        "Proceduri de management al incidentelor",
-        "Raport de audit de securitate",
-        "Raport de autoevaluare"
+        "Proceduri de management al incidentelor"
       ]
     };
   }
 
-  // 3. Verificare sectoare specifice
-  if (answers.sector === 'Sănătate') {
-    let isEssential = answers.size === 'Întreprindere mare' || 
-                      answers.medicineResearch === 'Da' || 
-                      answers.pharmaProduction === 'Da' || 
-                      answers.medicalDevices === 'Da';
-
-    if (isEssential) {
-      return {
-        category: "Entitate esențială",
-        reference: "Art. 5 și Anexa 1 - Sectorul Sănătății din OUG 155/2024",
-        explanation: "Entitate din sectorul sănătății care îndeplinește criteriile de dimensiune sau activitate specifică",
-        obligations: [
-          "Notificare în 30 zile (Art. 18)",
-          "Măsuri tehnice și organizatorice de securitate (Art. 11-14)",
-          "Raportare incidente în 24h (Art. 15)",
-          "Audit periodic de securitate (Art. 11)",
-          "Autoevaluare anuală (Art. 12)"
-        ],
-        documents: [
-          "Notificare către DNSC",
-          "Politica de securitate cibernetică",
-          "Plan de răspuns la incidente",
-          "Proceduri operaționale de securitate",
-          "Raport de audit",
-          "Raport de autoevaluare"
-        ]
-      };
-    }
-  }
-
-  // 4. Verificare pentru sectoarele din Anexa 1
+// 3. Verificare sectoare Anexa 1
   const anexa1Sectors = [
     'Energie',
     'Transport',
@@ -218,31 +157,52 @@ function determineCategory() {
     'Spațiu'
   ];
 
-  if (anexa1Sectors.includes(answers.sector) && 
-      (answers.size === 'Întreprindere mare' || answers.size === 'Întreprindere mijlocie')) {
-    return {
-      category: "Entitate esențială",
-      reference: `Art. 5 alin. (2) și Anexa 1 - Sectorul ${answers.sector} din OUG 155/2024`,
-      explanation: `Entitate din sectorul ${answers.sector} care îndeplinește criteriile de dimensiune`,
-      obligations: [
-        "Notificare în 30 zile (Art. 18)",
-        "Măsuri de securitate conform sector (Art. 11-14)",
-        "Raportare incidente (Art. 15)",
-        "Audit de securitate (Art. 11)",
-        "Autoevaluare anuală (Art. 12)"
-      ],
-      documents: [
-        "Notificare către DNSC",
-        "Politica de securitate cibernetică specifică sectorului",
-        "Plan de răspuns la incidente",
-        "Proceduri operaționale specifice",
-        "Raport de audit",
-        "Raport de autoevaluare"
-      ]
-    };
+  if (anexa1Sectors.includes(answers.sector)) {
+    if (answers.size === 'Întreprindere mare' || answers.size === 'Întreprindere mijlocie') {
+      return {
+        category: "Entitate esențială",
+        reference: `Art. 5 alin. (2) și Anexa 1 - Sectorul ${answers.sector} din OUG 155/2024`,
+        explanation: `Entitate din sectorul ${answers.sector} care îndeplinește criteriile de dimensiune`,
+        obligations: [
+          "Notificare în 30 zile (Art. 18)",
+          "Măsuri de securitate conform sector (Art. 11-14)",
+          "Raportare incidente (Art. 15)",
+          "Audit de securitate (Art. 11)"
+        ],
+        documents: [
+          "Notificare către DNSC",
+          "Politica de securitate cibernetică",
+          "Plan de răspuns la incidente",
+          "Proceduri operaționale specifice"
+        ]
+      };
+    }
   }
 
-  // 5. Verificare pentru sectoarele din Anexa 2
+  // 4. Verificare sector sănătate
+  if (answers.sector === 'Sănătate') {
+    if (answers.size === 'Întreprindere mare') {
+      return {
+        category: "Entitate esențială",
+        reference: "Art. 5 și Anexa 1 - Sectorul Sănătății din OUG 155/2024",
+        explanation: "Entitate din sectorul sănătății care îndeplinește criteriile de dimensiune",
+        obligations: [
+          "Notificare în 30 zile (Art. 18)",
+          "Măsuri tehnice și organizatorice de securitate (Art. 11-14)",
+          "Raportare incidente în 24h (Art. 15)",
+          "Audit periodic de securitate (Art. 11)"
+        ],
+        documents: [
+          "Notificare către DNSC",
+          "Politica de securitate cibernetică",
+          "Plan de răspuns la incidente",
+          "Proceduri operaționale de securitate"
+        ]
+      };
+    }
+  }
+
+// 5. Verificare sectoare Anexa 2
   const anexa2Sectors = [
     'Servicii poștale și de curierat',
     'Gestionarea deșeurilor',
@@ -326,12 +286,8 @@ function generatePDF() {
           margin-bottom: 5px;
         }
         @media print {
-          body {
-            padding: 0;
-          }
-          button {
-            display: none;
-          }
+          body { padding: 0; }
+          button { display: none; }
         }
       </style>
     </head>
@@ -386,8 +342,6 @@ function showResult() {
     <div class="result" id="resultPDF">
       <div class="result-header">${result.category}</div>
       <div class="result-section">
-        <strong>Baza legală:</strong> ${result.reference
-<div class="result-section">
         <strong>Baza legală:</strong> ${result.reference}
       </div>
       <div class="result-section">
@@ -428,10 +382,7 @@ document.getElementById('nextButton').addEventListener('click', () => {
   
   answers[questions[currentStep].key] = selectedOption.value;
   
-  if (answers.sector === 'Sănătate' && currentStep === Object.keys(questions).length) {
-    currentStep++;
-    renderQuestion(currentStep);
-  } else if (currentStep < Object.keys(questions).length) {
+  if (currentStep < Object.keys(questions).length) {
     currentStep++;
     renderQuestion(currentStep);
   } else {
