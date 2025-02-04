@@ -174,18 +174,51 @@ function determineCategory() {
     };
   }
 
-  // 3. Verificare sectoare specifice
-  if (answers.sector === 'Sănătate') {
-    let isEssential = answers.size === 'Întreprindere mare' || 
-                      answers.medicineResearch === 'Da' || 
-                      answers.pharmaProduction === 'Da' || 
-                      answers.medicalDevices === 'Da';
+  // 3. Verificare sectoare specifice Anexa 1
+  const anexa1Sectors = [
+    'Energie',
+    'Transport',
+    'Bancar',
+    'Infrastructuri ale pieței financiare',
+    'Apă potabilă',
+    'Ape uzate',
+    'Infrastructură digitală',
+    'Gestionare servicii TIC',
+    'Spațiu'
+  ];
 
-    if (isEssential) {
+  if (anexa1Sectors.includes(answers.sector)) {
+    if (answers.size === 'Întreprindere mare' || answers.size === 'Întreprindere mijlocie') {
+      return {
+        category: "Entitate esențială",
+        reference: `Art. 5 alin. (2) și Anexa 1 - Sectorul ${answers.sector} din OUG 155/2024`,
+        explanation: `Entitate din sectorul ${answers.sector} care îndeplinește criteriile de dimensiune`,
+        obligations: [
+          "Notificare în 30 zile (Art. 18)",
+          "Măsuri de securitate conform sector (Art. 11-14)",
+          "Raportare incidente (Art. 15)",
+          "Audit de securitate (Art. 11)",
+          "Autoevaluare anuală (Art. 12)"
+        ],
+        documents: [
+          "Notificare către DNSC",
+          "Politica de securitate cibernetică specifică sectorului",
+          "Plan de răspuns la incidente",
+          "Proceduri operaționale specifice",
+          "Raport de audit",
+          "Raport de autoevaluare"
+        ]
+      };
+    }
+  }
+
+  // 4. Verificare sector sănătate (caz special din Anexa 1)
+  if (answers.sector === 'Sănătate') {
+    if (answers.size === 'Întreprindere mare') {
       return {
         category: "Entitate esențială",
         reference: "Art. 5 și Anexa 1 - Sectorul Sănătății din OUG 155/2024",
-        explanation: "Entitate din sectorul sănătății care îndeplinește criteriile de dimensiune sau activitate specifică",
+        explanation: "Entitate din sectorul sănătății care îndeplinește criteriile de dimensiune",
         obligations: [
           "Notificare în 30 zile (Art. 18)",
           "Măsuri tehnice și organizatorice de securitate (Art. 11-14)",
@@ -203,43 +236,6 @@ function determineCategory() {
         ]
       };
     }
-  }
-
-  // 4. Verificare pentru sectoarele din Anexa 1
-  const anexa1Sectors = [
-    'Energie',
-    'Transport',
-    'Bancar',
-    'Infrastructuri ale pieței financiare',
-    'Apă potabilă',
-    'Ape uzate',
-    'Infrastructură digitală',
-    'Gestionare servicii TIC',
-    'Spațiu'
-  ];
-
-  if (anexa1Sectors.includes(answers.sector) && 
-      (answers.size === 'Întreprindere mare' || answers.size === 'Întreprindere mijlocie')) {
-    return {
-      category: "Entitate esențială",
-      reference: `Art. 5 alin. (2) și Anexa 1 - Sectorul ${answers.sector} din OUG 155/2024`,
-      explanation: `Entitate din sectorul ${answers.sector} care îndeplinește criteriile de dimensiune`,
-      obligations: [
-        "Notificare în 30 zile (Art. 18)",
-        "Măsuri de securitate conform sector (Art. 11-14)",
-        "Raportare incidente (Art. 15)",
-        "Audit de securitate (Art. 11)",
-        "Autoevaluare anuală (Art. 12)"
-      ],
-      documents: [
-        "Notificare către DNSC",
-        "Politica de securitate cibernetică specifică sectorului",
-        "Plan de răspuns la incidente",
-        "Proceduri operaționale specifice",
-        "Raport de audit",
-        "Raport de autoevaluare"
-      ]
-    };
   }
 
   // 5. Verificare pentru sectoarele din Anexa 2
@@ -281,7 +277,6 @@ function determineCategory() {
     documents: ["Nu sunt necesare documente conform OUG 155/2024"]
   };
 }
-
 function generatePDF() {
   const result = determineCategory();
   
